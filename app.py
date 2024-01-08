@@ -51,7 +51,19 @@ if submit and input_text:
 
     response_history = ''
     for chunk in response:
-        response_history += chunk    
+        response_history += chunk 
+
+# Use st.markdown to add custom CSS for sidebar width
+st.markdown(
+    """
+    <style>
+    .css-1l02zno {
+        width: 350px !important; /* Adjust the width as needed */
+    }
+    </style>
+    """,
+    unsafe_allow_html=True,
+)
 
     # Write chat history in individual collapsible sections
 with st.sidebar:
@@ -61,6 +73,13 @@ with st.sidebar:
     if submit and input_text:
         expander = st.expander(f"You: {input_text}", expanded=False)
         expander.write(response_history)
+
+# Use st.sidebar to add content to the sidebar
+st.sidebar.title('Advertisement')
+
+# Add an example advertisement (you can replace this with your own)
+# st.sidebar.markdown("Put your advertisement content here!")
+st.sidebar.markdown('<img src="https://d1csarkz8obe9u.cloudfront.net/posterpreviews/water-sale-ad-design-template-3a77219913ffe39f1adf1782ea3268f0_screen.jpg?ts=1637046434" alt="Advertisement">', unsafe_allow_html=True)
 
 # Add some styling
 st.markdown(
