@@ -1,43 +1,99 @@
-## loading all the environment variables
+# Import necessary libraries
 from dotenv import load_dotenv
-load_dotenv() 
-
 import streamlit as st
 import os
 import google.generativeai as genai
+import time
+import streamlit.components.v1 as components
 
+# Load environment variables
+load_dotenv()
+
+# Configure Google API
 genai.configure(api_key=os.getenv("GOOGLE_API_KEY"))
 
-## function to load Gemini Pro model and get repsonses
-model=genai.GenerativeModel("gemini-pro") 
+# Initialize GenerativeModel
+model = genai.GenerativeModel("gemini-pro")
 chat = model.start_chat(history=[])
+
+# Function to get Gemini response with a typewriter effect
 def get_gemini_response(question):
-    
-    response=chat.send_message(question,stream=True)
-    return response
+    response = chat.send_message(question, stream=True)
+    prompt_response = []
+    for chunk in response:
+        st.write(chunk.text, type="default")   
+        prompt_response.append(chunk.text)
+    return prompt_response    
 
-##initialize our streamlit app
+# Set page configuration
+st.set_page_config(page_title="Water Bot Demo", page_icon=":droplet:")
 
-st.set_page_config(page_title="Q&A Demo")
+# Define header and title
+st.title("Water Bot Chat Interface")
+st.markdown("---")
 
-st.header("Water Bot")
-
-# Initialize session state for chat history if it doesn't exist
+# Initialize chat history
 if 'chat_history' not in st.session_state:
     st.session_state['chat_history'] = []
+     
 
-input=st.text_input("Input: ",key="input")
-submit=st.button("Ask the question")
+# User input and submit button
+input_text = st.text_input("Input: ", key="input")
+submit = st.button("Ask the question", key="submit_button")
 
-if submit and input:
-    response=get_gemini_response(input)
-    # Add user query and response to session state chat history
-    st.session_state['chat_history'].append(("You", input))
-    st.subheader("Response:")
+# Process user input and get response
+
+if submit and input_text:
+    st.subheader(f'You: {input_text}')
+    response = get_gemini_response(input_text)
+    for t in response:
+        st.session_state['chat_history'].append(t)
+
+    response_history = ''
     for chunk in response:
-        st.write(chunk.text)
-        st.session_state['chat_history'].append(("Bot", chunk.text))
-st.subheader("Chat History")
-    
-for role, text in st.session_state['chat_history']:
-    st.write(f"{role}: {text}")
+        response_history += chunk    
+
+    # Write chat history in individual collapsible sections
+with st.sidebar:
+    st.markdown("## Chat History")
+    st.text("")
+    # for role, text in st.session_state['chat_history']:
+    if submit and input_text:
+        expander = st.expander(f"You: {input_text}", expanded=False)
+        expander.write(response_history)
+
+# Add some styling
+st.markdown(
+    """
+    <style>
+    .stTextInput, .stButton {
+        border-radius: 8px;
+        padding: 8px;
+        margin-bottom: 12px;
+    }
+    .stTextInput {
+        box-shadow: 2px 2px 6px rgba(0, 0, 0, 0.1);
+    }
+    .stButton {
+        color: red;
+        font-weight: bold;
+        cursor: pointer;
+        transition: background-color 0.3s, color 0.3s;
+        background-color: transparent;
+        border-radius: 8px;
+        padding: 6px 12px;
+    }
+    .stMarkdown {
+        margin-top: 16px;
+        margin-bottom: 8px;
+    }
+    .stSidebar {
+        background-color: '#ADF5EF';
+    }
+    .css-1p9gthz {
+        background-color: '#ADF5EF'; /* Change this color to your desired sidebar background color */
+    }
+    </style>
+    """,
+    unsafe_allow_html=True,
+)
