@@ -29,10 +29,10 @@ client = connect_to_google_sheets()
 spreadsheet = client.open("Water related queries")
 sheet = spreadsheet.worksheet("Water_related_queries")
 
-records = sheet.get_all_records()
+# records = sheet.get_all_records()
 
 # Convert records to DataFrame
-df = pd.DataFrame(records)
+# df = pd.DataFrame(records)
 
 # Function to get Gemini response with a typewriter effect
 def get_gemini_response(question):
@@ -45,8 +45,8 @@ def get_gemini_response(question):
 
 
 # Function to update chat history in Google Spreadsheet
-def update_chat_history(username, input_text, response, review):
-    row = [username, input_text, str(response), review]
+def update_chat_history(username, input_text):
+    row = [username, input_text]
     sheet.append_row(row)
 
 # Set page configuration
@@ -69,7 +69,7 @@ with st.form("user_signup_form"):
     elif submitted and not username_input:
         st.error("Please enter a username!")
 
-required_chat_history = df[df['Name'] == username_input][['Name', 'Questions']]        
+# required_chat_history = df[df['Name'] == username_input][['Name', 'Questions']]        
 
 submit = ''
 if username_input:
@@ -92,7 +92,7 @@ if submit and input_text and username_input:
 
     if option:
         st.write(option)
-    update_chat_history(username_input, input_text, response, option)
+    update_chat_history(username_input, input_text)
     # st.subheader(f'Bot: {response}')
 elif submit and not input_text:
     st.error("Please enter a question!")
