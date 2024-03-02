@@ -45,8 +45,8 @@ def get_gemini_response(question):
 
 
 # Function to update chat history in Google Spreadsheet
-def update_chat_history(username, input_text):
-    row = [username, input_text]
+def update_chat_history(username, input_text, response, review):
+    row = [username, input_text, str(response), review]
     sheet.append_row(row)
 
 # Set page configuration
@@ -60,7 +60,7 @@ st.markdown("---")
 if 'chat_history' not in st.session_state:
     st.session_state['chat_history'] = []
    
-
+username_input = None   
 with st.form("user_signup_form"):
     username_input = st.text_input("Enter your username:", key="user_input")
     submitted = st.form_submit_button("Submit")
@@ -73,9 +73,10 @@ required_chat_history = df[df['Name'] == username_input][['Name', 'Questions']]
 
 submit = ''
 if username_input:
-    input_text = st.text_input("Input: ", key="input")
-    submit = st.button("Ask the question", key="submit_button")
-
+    st.subheader('Ask me any question')
+    input_text = st.text_input("", key="input")
+    submit = st.button("Enter", key="submit_button")
+    
 # Process user input and get response
 if submit and input_text and username_input:
     st.subheader(f'You: {input_text}')
@@ -83,7 +84,15 @@ if submit and input_text and username_input:
     # Assuming response is the text response from the bot
     response = get_gemini_response(input_text)  # Replace with actual response generation logic
     st.session_state['chat_history'].append((username_input, input_text, response))
-    update_chat_history(username_input, input_text)
+    option = st.selectbox(
+    'How satisfied are you with the answer?',
+    ('Very Satisfied', 'Satisfied', 'Somewhat satisfied', 'Answer not relevant to the topic'),
+    index=None,
+    placeholder='Select any one')
+
+    if option:
+        st.write(option)
+    update_chat_history(username_input, input_text, response, option)
     # st.subheader(f'Bot: {response}')
 elif submit and not input_text:
     st.error("Please enter a question!")
