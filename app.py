@@ -59,7 +59,7 @@ st.markdown("---")
 # Initialize chat history
 if 'chat_history' not in st.session_state:
     st.session_state['chat_history'] = []
-
+   
 
 with st.form("user_signup_form"):
     username_input = st.text_input("Enter your username:", key="user_input")
@@ -71,8 +71,10 @@ with st.form("user_signup_form"):
 
 required_chat_history = df[df['Name'] == username_input][['Name', 'Questions']]        
 
-input_text = st.text_input("Input: ", key="input")
-submit = st.button("Ask the question", key="submit_button")
+submit = ''
+if username_input:
+    input_text = st.text_input("Input: ", key="input")
+    submit = st.button("Ask the question", key="submit_button")
 
 # Process user input and get response
 if submit and input_text and username_input:
