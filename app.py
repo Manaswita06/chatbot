@@ -82,17 +82,20 @@ if submit and input_text and username_input:
     st.subheader(f'You: {input_text}')
     # Placeholder for the response generation logic
     # Assuming response is the text response from the bot
-    response = get_gemini_response(input_text)  # Replace with actual response generation logic
-    st.session_state['chat_history'].append((username_input, input_text, response))
-    option = st.selectbox(
-    'How satisfied are you with the answer?',
-    ('Very Satisfied', 'Satisfied', 'Somewhat satisfied', 'Answer not relevant to the topic'),
-    index=None,
-    placeholder='Select any one')
+    try:
+        response = get_gemini_response(input_text)  # Replace with actual response generation logic
+        st.session_state['chat_history'].append((username_input, input_text, response))
+        option = st.selectbox(
+        'How satisfied are you with the answer?',
+        ('Very Satisfied', 'Satisfied', 'Somewhat satisfied', 'Answer not relevant to the topic'),
+        index=None,
+        placeholder='Select any one')
 
-    if option:
-        st.write(option)
-    update_chat_history(username_input, input_text)
+        if option:
+            st.write(option)
+        update_chat_history(username_input, input_text)
+    except:
+        st.write("I am sorry, Can you please ask relevant questions?")    
     # st.subheader(f'Bot: {response}')
 elif submit and not input_text:
     st.error("Please enter a question!")
