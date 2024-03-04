@@ -29,7 +29,6 @@ client = connect_to_google_sheets()
 spreadsheet = client.open("Water related queries")
 sheet = spreadsheet.worksheet("Water_related_queries")
 
-
 # Function to get Gemini response with a typewriter effect
 def get_gemini_response(question):
     response = chat.send_message(question, stream=True)
@@ -79,7 +78,7 @@ option = ''
 if submit and input_text and username_input:
     st.subheader(f'You: {input_text}')
     # Placeholder for the response generation logic
-    # Assuming response is the text response from the bot
+
     response = get_gemini_response(input_text)  # Replace with actual response generation logic
     st.session_state['chat_history'].append((username_input, input_text, response))
     option = st.selectbox(
@@ -93,8 +92,7 @@ if submit and input_text and username_input:
     
     if st.session_state.satisfaction_option:
         st.write(st.session_state.satisfaction_option)
-        
-
+       
 elif submit and not input_text:
     st.error("Please enter a question!")
 elif submit and not username_input:
