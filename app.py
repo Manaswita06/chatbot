@@ -29,11 +29,6 @@ client = connect_to_google_sheets()
 spreadsheet = client.open("Water related queries")
 sheet = spreadsheet.worksheet("Water_related_queries")
 
-# records = sheet.get_all_records()
-
-# Convert records to DataFrame
-# df = pd.DataFrame(records)
-
 # Function to get Gemini response with a typewriter effect
 def get_gemini_response(question):
     response = chat.send_message(question, stream=True)
@@ -45,8 +40,8 @@ def get_gemini_response(question):
 
 
 # Function to update chat history in Google Spreadsheet
-def update_chat_history(username, input_text):
-    row = [username, input_text]
+def update_chat_history(username, input_text, response):
+    row = [username, input_text, str(response)]
     sheet.append_row(row)
 
 # Set page configuration
@@ -78,25 +73,26 @@ if username_input:
     submit = st.button("Enter", key="submit_button")
     
 # Process user input and get response
+response = ''
+option = ''
 if submit and input_text and username_input:
     st.subheader(f'You: {input_text}')
     # Placeholder for the response generation logic
-    # Assuming response is the text response from the bot
-    try:
-        response = get_gemini_response(input_text)  # Replace with actual response generation logic
-        st.session_state['chat_history'].append((username_input, input_text, response))
-        option = st.selectbox(
+
+    response = get_gemini_response(input_text)  # Replace with actual response generation logic
+    st.session_state['chat_history'].append((username_input, input_text, response))
+    option = st.selectbox(
         'How satisfied are you with the answer?',
         ('Very Satisfied', 'Satisfied', 'Somewhat satisfied', 'Answer not relevant to the topic'),
         index=None,
-        placeholder='Select any one')
-
-        if option:
-            st.write(option)
-        update_chat_history(username_input, input_text)
-    except:
-        st.write("I am sorry, Can you please ask relevant questions?")    
-    # st.subheader(f'Bot: {response}')
+        placeholder='Select one option',
+        key="satisfaction_option"
+    )
+    update_chat_history(username_input, input_text, response)
+    
+    if st.session_state.satisfaction_option:
+        st.write(st.session_state.satisfaction_option)
+       
 elif submit and not input_text:
     st.error("Please enter a question!")
 elif submit and not username_input:
