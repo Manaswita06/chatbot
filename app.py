@@ -32,21 +32,22 @@ def get_gemini_response(question):
     response = chat.send_message(question, stream=True)
     prompt_response = []
     for chunk in response:
-        st.write(chunk.text)
         prompt_response.append(chunk.text)
-    return prompt_response    
+    return "".join(prompt_response)  # Concatenate all parts of the response
 
 # Function to update chat history in Google Spreadsheet
 def update_chat_history(username, input_text, response, satisfaction):
-    row = [username, input_text, ''.join(response), satisfaction]
+    row = [username, input_text, response, satisfaction]
     sheet.append_row(row)
 
-# Streamlit UI
+# Streamlit UI setup
 st.set_page_config(page_title="Water Bot Demo", page_icon=":droplet:")
 
-# Initialize chat_history in session state if it doesn't exist
+# Initialize session state variables if they don't exist
 if 'chat_history' not in st.session_state:
     st.session_state['chat_history'] = []
+if 'current_response' not in st.session_state:
+    st.session_state['current_response'] = ""
 
 # Sidebar: User Registration and Chat History
 with st.sidebar:
@@ -57,27 +58,39 @@ with st.sidebar:
 
     st.title("Chat History")
     for item in st.session_state['chat_history']:
-        if len(item) == 4:  # Ensure the tuple has four elements
-            st.text(f"User: {item[0]}")
-            st.text(f"Question: {item[1]}")
-            st.text(f"Response: {''.join(item[2])}")  # Assuming item[2] is a list or similar iterable
-            st.text(f"Satisfaction: {item[3]}")
-            st.markdown("---")
+        st.text(f"User: {item[0]}")
+        st.text(f"Question: {item[1]}")
+        st.text(f"Response: {item[2]}")
+        st.text(f"Satisfaction: {item[3]}")
+        st.markdown("---")
 
 # Main Page: Question Input and Response
 st.title("Water Bot Chat Interface")
 if 'username' in st.session_state and st.session_state['username']:
     input_text = st.text_input("Ask me any question:")
-    if input_text:
-        with st.spinner('Getting your response...'):
-            response = get_gemini_response(input_text)
-            st.session_state['chat_history'].append((st.session_state['username'], input_text, response))
-            satisfaction = st.selectbox(
-                'How satisfied are you with the answer?',
-                ('Very Satisfied', 'Satisfied', 'Somewhat satisfied', 'Not satisfied'),
-                key="satisfaction_option"
-            )
-            if st.button("Save Feedback"):
-                update_chat_history(st.session_state['username'], input_text, response, satisfaction)
+    generate_button = st.button("Get Response")
+
+    if generate_button and input_text:
+        # Get the response and store it in session state
+        st.session_state['current_response'] = get_gemini_response(input_text)
+
+    # Display the response if it's available
+    if st.session_state['current_response']:
+        st.write(st.session_state['current_response'])
+
+    # Select box for satisfaction
+    satisfaction = st.selectbox(
+        'How satisfied are you with the answer?',
+        ('Very Satisfied', 'Satisfied', 'Somewhat satisfied', 'Not satisfied'),
+        key="satisfaction_option"
+    )
+
+    # Save feedback button
+    if st.button("Save Feedback"):
+        if st.session_state['current_response'] and input_text:
+            update_chat_history(st.session_state['username'], input_text, st.session_state['current_response'], satisfaction)
+            st.success("Feedback saved successfully!")
+            # Clear the response to prepare for the next interaction
+            st.session_state['current_response'] = ""
 else:
     st.info("Please enter a username in the sidebar to begin.")
