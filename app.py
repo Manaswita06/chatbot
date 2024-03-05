@@ -56,13 +56,13 @@ with st.sidebar:
     if username_input:
         st.session_state['username'] = username_input
 
-    st.title("Chat History")
-    for item in st.session_state['chat_history']:
-        st.text(f"User: {item[0]}")
-        st.text(f"Question: {item[1]}")
-        st.text(f"Response: {item[2]}")
-        st.text(f"Satisfaction: {item[3]}")
-        st.markdown("---")
+    # st.title("Chat History")
+    # for item in st.session_state['chat_history']:
+    #     st.text(f"User: {item[0]}")
+    #     st.text(f"Question: {item[1]}")
+    #     st.text(f"Response: {item[2]}")
+    #     st.text(f"Satisfaction: {item[3]}")
+    #     st.markdown("---")
 
 # Main Page: Question Input and Response
 st.title("Water Bot Chat Interface")
@@ -75,8 +75,11 @@ if 'username' in st.session_state and st.session_state['username']:
         st.session_state['current_response'] = get_gemini_response(input_text)
 
     # Display the response if it's available
-    if st.session_state['current_response']:
-        st.write(st.session_state['current_response'])
+    try:
+        if st.session_state['current_response']:
+            st.write(st.session_state['current_response'])
+    except:
+        st.warning("Server busy, try after some time.")        
 
     # Select box for satisfaction
     satisfaction = st.selectbox(
